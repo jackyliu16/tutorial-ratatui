@@ -399,6 +399,7 @@ dependencies = [
 name = "tutorial-ratatui"
 version = "0.1.0"
 dependencies = [
+ "crossterm",
  "ratatui",
 ]
 
