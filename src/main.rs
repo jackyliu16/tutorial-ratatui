@@ -1,3 +1,4 @@
+// use to add error reporting hooks (display in alternate screen and restore)
 use color_eyre::{
     eyre::{bail, WrapErr},
     Result,
@@ -15,6 +16,10 @@ use ratatui::{
 
 mod tui;
 
+// Main Function
+// 1. init terminal
+// 2. run app in loop until exit
+// 3. restore terminal state
 fn main() -> Result<()> {
     color_eyre::install()?;
     let mut terminal = tui::init()?;
@@ -44,6 +49,7 @@ impl App {
         Ok(())
     }
 
+    // render_widget accept anything impl Widget traits
     fn render_frame(&self, frame: &mut Frame) {
         frame.render_widget(self, frame.area());
     }
@@ -60,6 +66,7 @@ impl App {
         }
     }
 
+    // optional event: https://docs.rs/crossterm/latest/crossterm/event/index.html
     fn handle_key_event(&mut self, key_event: KeyEvent) -> Result<()> {
         match key_event.code {
             KeyCode::Char('q') => self.exit(),
@@ -89,6 +96,7 @@ impl App {
 }
 
 impl Widget for &App {
+    // render func will not mutate any state, impl this could we use after call to draw
     fn render(self, area: Rect, buf: &mut Buffer) {
         let title = Line::from(" Counter App Tutorial ".bold());
         let instructions = Line::from(vec![
@@ -139,12 +147,17 @@ mod tests {
         let title_style = Style::new().bold();
         let counter_style = Style::new().yellow();
         let key_style = Style::new().blue().bold();
+
+        // NOTE: https://ratatui.rs/concepts/layout/
+        // set expected's (14, 0) width=22, height=1 area as bold
         expected.set_style(Rect::new(14, 0, 22, 1), title_style);
         expected.set_style(Rect::new(28, 1, 1, 1), counter_style);
         expected.set_style(Rect::new(13, 3, 6, 1), key_style);
         expected.set_style(Rect::new(30, 3, 7, 1), key_style);
         expected.set_style(Rect::new(43, 3, 4, 1), key_style);
 
+        // base on original text and formating operation,
+        // expected should be as same as generated.
         assert_eq!(buf, expected);
     }
 
